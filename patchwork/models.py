@@ -446,6 +446,21 @@ class BundlePatch(models.Model):
 
 SERIES_DEFAULT_NAME = "Series without cover letter"
 
+
+class TestStates:
+    STATE_PENDING = 0
+    STATE_SUCCESS = 1
+    STATE_WARNING = 2
+    STATE_FAILURE = 3
+    STATE_CHOICES = (
+        (STATE_PENDING, 'pending'),
+        (STATE_SUCCESS, 'success'),
+        (STATE_WARNING, 'warning'),
+        (STATE_FAILURE, 'failure'),
+    )
+
+
+
 # This Model represents the "top level" Series, an object that doesn't change
 # with the various versions of patches sent to the mailing list.
 class Series(models.Model):
@@ -461,6 +476,12 @@ class Series(models.Model):
     version = models.IntegerField(default=1)
     # This is the number of patches of the latest version.
     n_patches = models.IntegerField(default=0)
+    # This
+    test_state = models.SmallIntegerField(choices=TestStates.STATE_CHOICES, default=TestStates.STATE_PENDING)
+
+    # @property
+    # def test_status(self):
+    #     return [random.randint(-5, 0), random.randint(0, 5)]
 
     def __unicode__(self):
         return self.name
@@ -480,6 +501,8 @@ class Series(models.Model):
         print('Series: %s' % self)
         print('    version: %d' % self.version)
         print('    n_patches: %d' % self.n_patches)
+        print('    test_state: %d' % TestStates.STATE_CHOICES[self.test_state])
+
         for rev in self.revisions():
             print('    rev %d:' % rev.version)
             i = 1
@@ -629,24 +652,14 @@ class Test(models.Model):
     def __unicode__(self):
         return self.name
 
-class TestResult(models.Model):
-    STATE_PENDING = 0
-    STATE_SUCCESS = 1
-    STATE_WARNING = 2
-    STATE_FAILURE = 3
-    STATE_CHOICES = (
-        (STATE_PENDING, 'pending'),
-        (STATE_SUCCESS, 'success'),
-        (STATE_WARNING, 'warning'),
-        (STATE_FAILURE, 'failure'),
-    )
+class TestResult(models.Model, TestStates):
 
     test = models.ForeignKey(Test)
     revision = models.ForeignKey(SeriesRevision, blank=True, null=True)
     patch = models.ForeignKey(Patch, blank=True, null=True)
     user = models.ForeignKey(User)
     date = models.DateTimeField(auto_now=True)
-    state = models.SmallIntegerField(choices=STATE_CHOICES)
+    state = models.SmallIntegerField(choices=TestStates.STATE_CHOICES)
     url = models.URLField(blank=True, null=True)
     summary = models.TextField(blank=True, null=True)
 
