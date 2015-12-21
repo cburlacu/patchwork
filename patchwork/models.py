@@ -476,12 +476,11 @@ class Series(models.Model):
     version = models.IntegerField(default=1)
     # This is the number of patches of the latest version.
     n_patches = models.IntegerField(default=0)
-    # This
+    # This is the test status of this series
     test_state = models.SmallIntegerField(choices=TestStates.STATE_CHOICES, default=TestStates.STATE_PENDING)
 
-    # @property
-    # def test_status(self):
-    #     return [random.randint(-5, 0), random.randint(0, 5)]
+    def __init__(self, *args, **kwargs):
+        super(Series, self).__init__(*args, **kwargs)
 
     def __unicode__(self):
         return self.name

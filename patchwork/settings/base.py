@@ -68,7 +68,7 @@ TEMPLATE_DIRS = (
 
 # Email
 
-DEFAULT_FROM_EMAIL = 'Patchwork <patchwork@patchwork.example.com>'
+DEFAULT_FROM_EMAIL = 'Patchwork <patchwork@cburlacu-PC>'
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 #

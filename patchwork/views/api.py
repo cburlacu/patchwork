@@ -335,8 +335,10 @@ class PatchViewSet(mixins.ListModelMixin,
         return patch_mbox(request, pk)
 
 class PatchResultViewSet(viewsets.ViewSet, ResultMixin):
-    permission_classes = (MaintainerPermission, )
-    authentication_classes = (BasicAuthentication, )
+    # permission_classes = (MaintainerPermission, )
+    # authentication_classes = (BasicAuthentication, )
+    permission_classes = (permissions.AllowAny, )
+    # authentication_classes = (aut, )
 
     def create(self, request, patch_pk=None):
         patch = get_object_or_404(Patch, pk=patch_pk)

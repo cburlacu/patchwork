@@ -1,4 +1,4 @@
-#!/bin/sh
+ #!/bin/sh
 #
 # Patchwork - automated patch tracking system
 # Copyright (C) 2008 Jeremy Kerr <jk@ozlabs.org>
@@ -19,11 +19,24 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-BIN_DIR=`dirname $0`
-PATCHWORK_BASE=`readlink -e $BIN_DIR/../..`
+
+ADDRESS=0.0.0.0:8000
+CFG=patchwork.settings.dev-sqlite
+
+# . /sources/intel/patchwork/venv/bin/activate
+
+export DJANGO_SETTINGS_MODULE=$CFG
+
+PATCHWORK_BASE=`readlink -e /sources/intel/patchwork/`
+
+logger "Starting patchwork email script"
+logger $@
+echo "$@"
 
 PYTHONPATH="$PATCHWORK_BASE":"$PATCHWORK_BASE/lib/python:$PYTHONPATH" \
-        DJANGO_SETTINGS_MODULE=patchwork.settings.production \
-        "$PATCHWORK_BASE/patchwork/bin/parsemail.py" $@
+        DJANGO_SETTINGS_MODULE=patchwork.settings.dev-sqlite \
+        "$PATCHWORK_BASE/patchwork/bin/parsemail.py" --verbosity=debug $@
+
+# deactivate
 
 exit 0
