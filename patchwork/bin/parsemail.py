@@ -46,6 +46,9 @@ from patchwork.models import (Patch, Project, Person, Comment, State, Series,
     series_revision_complete, SERIES_DEFAULT_NAME)
 from patchwork.parser import parse_patch
 
+import syslog
+
+
 LOGGER = logging.getLogger(__name__)
 
 VERBOSITY_LEVELS = {
@@ -798,6 +801,7 @@ def lock():
 
 
 def main(args):
+    syslog.syslog('new email received')
     django.setup()
     logger = setup_error_handler()
     parser = argparse.ArgumentParser()
@@ -811,14 +815,19 @@ def main(args):
     parser.add_argument('--verbosity', choices=list_logging_levels(),
                         help='logging level', default='info')
 
+    parser.add_argument('--input', type = argparse.FileType('r'), default=sys.stdin)
+
     args = vars(parser.parse_args())
 
     logging.basicConfig(level=VERBOSITY_LEVELS[args['verbosity']])
 
-    mail = message_from_file(sys.stdin)
+    # mail = message_from_file(sys.stdin)
+    mail = message_from_file(args['input'])
     try:
         parse_lock = lock()
-        return parse_mail(mail)
+        retEmail = parse_mail(mail)
+        syslog.syslog("parse email result %d" % retEmail)
+        return retEmail
     except:
         if logger:
             logger.exception('Error when parsing incoming email', extra={
