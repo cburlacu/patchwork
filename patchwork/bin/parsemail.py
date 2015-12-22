@@ -27,6 +27,7 @@ from email.header import Header, decode_header
 from email.parser import HeaderParser
 from email.utils import parsedate_tz, mktime_tz
 import logging
+import logging.handlers
 import operator
 import re
 import sys
@@ -49,7 +50,7 @@ from patchwork.parser import parse_patch
 import syslog
 
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger("ParseEmail")
 
 VERBOSITY_LEVELS = {
     'debug': logging.DEBUG,
@@ -650,10 +651,12 @@ def on_revision_complete(sender, revision, **kwargs):
     # Brand new series (revision.version == 1) may be updates to a Series
     # previously posted. Hook the SeriesRevision to the previous series then.
     if revision.version != 1:
+        LOGGER.debug("revision %s" % revision.version)
         return
 
     new_series = revision.series
     if new_series.name == SERIES_DEFAULT_NAME:
+        LOGGER.debug("series name is default %s" % SERIES_DEFAULT_NAME)
         return
 
     name = clean_series_name(new_series.name)
@@ -661,6 +664,7 @@ def on_revision_complete(sender, revision, **kwargs):
                                             Q(name__iexact=name) &
                                             ~Q(pk=new_series.pk))
     if len(previous_series) != 1:
+        LOGGER.debug("previos series")
         return
 
     previous_series = previous_series[0]
@@ -693,6 +697,7 @@ def parse_mail(mail):
         return 0
 
     hint = mail.get('X-Patchwork-Hint', '').lower()
+
     if hint == 'ignore':
         LOGGER.debug("Ignoring mail due to 'ignore' hint")
         return 0
@@ -703,20 +708,23 @@ def parse_mail(mail):
         return 0
 
     msgid = mail.get('Message-Id').strip()
-
+    LOGGER.debug("msgid %s" % msgid)
     (author, save_required) = find_author(mail)
 
     content = find_content(project, mail)
+
+    LOGGER.debug("content %s" % content)
     if not content:
         return 0
     patch = content.patch
     comment = content.comment
     series = content.series
     revision = content.revision
-
+    LOGGER.debug("(%s %s %s %s)" % (patch, comment, series, revision))
     series_revision_complete.connect(on_revision_complete)
 
     if series:
+        LOGGER.debug("if series")
         if save_required:
             author.save()
             save_required = False
@@ -725,10 +733,12 @@ def parse_mail(mail):
         series.save()
 
     if revision:
+        LOGGER.debug("if revision")
         revision.series = series
         revision.save()
 
     if patch:
+        LOGGER.debug("if patch")
         # we delay the saving until we know we have a patch.
         if save_required:
             author.save()
@@ -744,6 +754,7 @@ def parse_mail(mail):
             revision.add_patch(patch, content.patch_order)
 
     if comment:
+        LOGGER.debug("if comment %s" % comment)
         if save_required:
             author.save()
         # we defer this assignment until we know that we have a saved patch
@@ -801,7 +812,14 @@ def lock():
 
 
 def main(args):
-    syslog.syslog('new email received')
+    formatter = logging.Formatter('%(name)s: %(levelname)s %(message)s')
+    sysloghandler = logging.handlers.SysLogHandler(address=('/dev/log'), facility=logging.handlers.SysLogHandler.LOG_LOCAL3)
+    sysloghandler.setFormatter(formatter)
+    oldhandler = LOGGER.addHandler(sysloghandler)
+    # logger.addhandler(logging.handlers.rotatingfilehandler("/tmp/parse_email.log"))
+    LOGGER.setLevel(logging.DEBUG)
+    LOGGER.warn("start parsing the email received ")
+
     django.setup()
     logger = setup_error_handler()
     parser = argparse.ArgumentParser()
@@ -819,14 +837,16 @@ def main(args):
 
     args = vars(parser.parse_args())
 
-    logging.basicConfig(level=VERBOSITY_LEVELS[args['verbosity']])
+    # logging.basicConfig(level=VERBOSITY_LEVELS[args['verbosity']])
 
     # mail = message_from_file(sys.stdin)
+
     mail = message_from_file(args['input'])
+
     try:
         parse_lock = lock()
         retEmail = parse_mail(mail)
-        syslog.syslog("parse email result %d" % retEmail)
+        LOGGER.debug("parse email result %d" % retEmail)
         return retEmail
     except:
         if logger:

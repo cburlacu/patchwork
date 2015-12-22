@@ -30,8 +30,6 @@ export DJANGO_SETTINGS_MODULE=$CFG
 PATCHWORK_BASE=`readlink -e /sources/intel/patchwork/`
 
 logger "Starting patchwork email script"
-logger $@
-echo "$@"
 
 PYTHONPATH="$PATCHWORK_BASE":"$PATCHWORK_BASE/lib/python:$PYTHONPATH" \
         DJANGO_SETTINGS_MODULE=patchwork.settings.dev-sqlite \
