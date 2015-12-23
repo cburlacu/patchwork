@@ -239,6 +239,10 @@ class ResultMixin(object):
         except AttributeError:
             return getattr(obj, 'msgid')
 
+    # update the status of the series from which this patch belong
+    def update_series_status(self, patch, test_result):
+        # Series.object.filter()
+        pass
 
     def handle_test_results(self, request, obj, check_obj, q, ctx):
         # auth
@@ -265,6 +269,7 @@ class ResultMixin(object):
 
         instance = result.save()
 
+        self.update_series_status(obj, instance)
         # mailing, done synchronously with the request, for now
         to = []
         cc = []

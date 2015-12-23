@@ -102,9 +102,11 @@ def find_project(mail):
 
             # order_by will put projects with a blank subject_prefix_tags
             # first
+
             projects = Project.objects.filter(listid=listid).\
                                        order_by('subject_prefix_tags')
             if not projects:
+                LOGGER.error("No project with id %s" % listid)
                 break
 
             # fast path for the common case
@@ -818,7 +820,9 @@ def main(args):
     oldhandler = LOGGER.addHandler(sysloghandler)
     # logger.addhandler(logging.handlers.rotatingfilehandler("/tmp/parse_email.log"))
     LOGGER.setLevel(logging.DEBUG)
-    LOGGER.warn("start parsing the email received ")
+    LOGGER.debug("=================================START==============================================")
+    LOGGER.debug("start parsing the email received ")
+
 
     django.setup()
     logger = setup_error_handler()
@@ -837,7 +841,7 @@ def main(args):
 
     args = vars(parser.parse_args())
 
-    # logging.basicConfig(level=VERBOSITY_LEVELS[args['verbosity']])
+    logging.basicConfig(level=VERBOSITY_LEVELS[args['verbosity']])
 
     # mail = message_from_file(sys.stdin)
 
@@ -856,6 +860,7 @@ def main(args):
         raise
     finally:
         release(parse_lock)
+        LOGGER.debug("====================================FINISH===========================================")
 
 
 if __name__ == '__main__':
