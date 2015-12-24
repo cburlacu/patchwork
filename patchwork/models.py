@@ -500,7 +500,7 @@ class Series(models.Model):
         print('Series: %s' % self)
         print('    version: %d' % self.version)
         print('    n_patches: %d' % self.n_patches)
-        print('    test_state: %d' % TestStates.STATE_CHOICES[self.test_state])
+        print('    test_state: %d - %s' % TestStates.STATE_CHOICES[self.test_state])
 
         for rev in self.revisions():
             print('    rev %d:' % rev.version)
