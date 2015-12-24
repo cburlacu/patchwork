@@ -43,3 +43,4 @@ DEBUG = True
 TEMPLATE_DEBUG = True
 ENABLE_XMLRPC = True
 
+INSTALLED_APPS.append('debug_toolbar')
