@@ -2,3 +2,5 @@
 selenium
 sphinx
 sphinxcontrib-httpdomain
+django-debug-toolbar
+
