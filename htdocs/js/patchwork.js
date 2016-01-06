@@ -78,6 +78,14 @@ var pw = (function() {
                record[this.id] + // jshint ignore:line
                '</a>';
     }
+    
+    /*
+     * for custom test result 
+     */
+    function stat_writer(record) {
+        var text = record.test_state;
+        return text;
+    }
 
     function date_writer(record) {
         return record[this.id].substr(0, 10);   // jshint ignore:line
@@ -153,7 +161,8 @@ var pw = (function() {
                 'Patches': 'n_patches',
                 'Submitter': 'submitter.name',
                 'Reviewer': 'reviewer.name',
-                'Updated': 'last_updated'
+                'Updated': 'last_updated',
+		'Test':'test_state'
             },
             'api_url': ctx.api_base_url + url,
             'api_params': {
