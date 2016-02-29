@@ -209,7 +209,7 @@ class SeriesFilter(django_filters.FilterSet):
 
     class Meta:
         model = Series
-        fields = []
+        fields = ['project']
 
 
 class SeriesListMixin(ListMixin):
