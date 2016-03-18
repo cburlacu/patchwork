@@ -25,7 +25,7 @@ from django.contrib import admin
 from patchwork.models import (Project, Person, UserProfile, State, Patch,
                               Comment, Bundle, Tag, EventLog, Test, TestResult,
                               DelegationRule, Series, SeriesRevision,
-							  APIToken)
+                              APIToken)
 
 
 class DelegationRuleInline(admin.TabularInline):
@@ -143,7 +143,7 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name',)
 admin.site.register(Tag, TagAdmin)
 
+
 class APITokenAdmin(admin.ModelAdmin):
     list_display = ('name', 'user', 'state')
 admin.site.register(APIToken, APITokenAdmin)
-
